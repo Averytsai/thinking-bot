@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 資料庫
+  postgres:
+    image: postgres:15-alpine
+    container_name: chatbot_postgres
+    environment:
+      POSTGRES_DB: chatbot_db
+      POSTGRES_USER: chatbot_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-chatbot_password}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --locale=C"
+    volumes:
+      - /Users/caimingzhi/Documents/Avery的專案\(嚴謹版\)/思考機器人/data/postgres:/var/lib/postgresql/data
+      - ./migrations/init:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    command: >
+      postgres
+      -c shared_preload_libraries=pg_stat_statements
+      -c max_connections=200
+      -c shared_buffers=256MB
+      -c effective_cache_size=1GB
+      -c maintenance_work_mem=64MB
+      -c checkpoint_completion_target=0.9
+      -c wal_buffers=16MB
+      -c default_statistics_target=100
+      -c timezone=Asia/Taipei
+
+  # Redis 快取
+  redis:
+    image: redis:7-alpine
+    container_name: chatbot_redis
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis_password}
+    volumes:
+      - /Users/caimingzhi/Documents/Avery的專案\(嚴謹版\)/思考機器人/data/redis:/data
+    ports:
+      - "6380:6379"
+    restart: unless-stopped
+
+  # Web 應用程式
+  web:
+    image: chatbot-web:latest
+    container_name: chatbot_web
+    environment:
+      - DATABASE_URL=postgresql://chatbot_user:chatbot_password@postgres:5432/chatbot_db
+      - REDIS_URL=redis://:redis_password@redis:6379/0
+      - OPENAI_API_KEY=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
+      - LINE_CHANNEL_ACCESS_TOKEN=uHJTVf4fY6hixiqQVhSqiKN7bwcx02Qv9uLRhr7ZmOZM4dtLdy38DdgjbKqYN94p+4y+4pAPQvr9ePbwJXR9J2RJ3NRL2cyL3jj6dhAgPHg9uomCGJ5/rpb6PjxSmrN3WsR8ZdePILD2igUZWRY9QAdB04t89/1O/w1cDnyilFU=
+      - LINE_CHANNEL_SECRET=db680d6b5849b879a1c65c596e386594
+      - DEBUG=false
+      - LOG_LEVEL=INFO
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    volumes:
+      - ./app:/app/app
+    command: >
+      sh -c "
+        echo 'Waiting for database...' &&
+        python -c 'import time; time.sleep(5)' &&
+        echo 'Starting application...' &&
+        python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+      "
+
+# volumes 已改為使用絕對路徑

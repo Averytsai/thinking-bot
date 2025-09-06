@@ -1,0 +1,9 @@
+version: "2"
+authtoken: 31Xr9KxcZIuW3vpDOlrjjlSu7lD_2rZMytUm3Utjku9NPaTEh
+tunnels:
+  chatbot:
+    addr: 8000
+    proto: http
+    subdomain: chatbot-thinking-robot
+    inspect: false
+    bind_tls: true
