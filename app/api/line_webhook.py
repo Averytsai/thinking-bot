@@ -10,7 +10,7 @@ from app.core.database import get_db
 from app.core.config import Settings
 from app.services import AIManager, LineService
 
-router = APIRouter(prefix="/api/line", tags=["LINE Bot"])
+router = APIRouter(prefix="/webhook", tags=["LINE Bot"])
 
 # 全域變數（在實際應用中應該使用依賴注入）
 _line_service: LineService = None
@@ -34,7 +34,7 @@ def get_line_service() -> LineService:
     return _line_service
 
 
-@router.post("/webhook")
+@router.post("/line")
 async def line_webhook(request: Request):
     """LINE Bot webhook端點"""
     try:
