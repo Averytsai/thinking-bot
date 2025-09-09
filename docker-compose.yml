@@ -46,11 +46,11 @@ services:
     environment:
       - DATABASE_URL=postgresql://chatbot_user:chatbot_password@postgres:5432/chatbot_db
       - REDIS_URL=redis://:redis_password@redis:6379/0
-      - OPENAI_API_KEY=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
-      - LINE_CHANNEL_ACCESS_TOKEN=uHJTVf4fY6hixiqQVhSqiKN7bwcx02Qv9uLRhr7ZmOZM4dtLdy38DdgjbKqYN94p+4y+4pAPQvr9ePbwJXR9J2RJ3NRL2cyL3jj6dhAgPHg9uomCGJ5/rpb6PjxSmrN3WsR8ZdePILD2igUZWRY9QAdB04t89/1O/w1cDnyilFU=
-      - LINE_CHANNEL_SECRET=db680d6b5849b879a1c65c596e386594
-      - DEBUG=false
-      - LOG_LEVEL=INFO
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - LINE_CHANNEL_ACCESS_TOKEN=${LINE_CHANNEL_ACCESS_TOKEN}
+      - LINE_CHANNEL_SECRET=${LINE_CHANNEL_SECRET}
+      - DEBUG=${DEBUG:-false}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
     ports:
       - "8000:8000"
     depends_on:
